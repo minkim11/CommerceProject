@@ -1,13 +1,10 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class Main {
     public static void main(String[] args) {
 
-        List<Product> products1 = new ArrayList<>();
-        List<Product> products2 = new ArrayList<>();
-        List<Product> products3 = new ArrayList<>();
-
+        // 카테고리 생성=========================================================
+        Category electronics = new Category("전자제품");
+        Category clothes = new Category("의류");
+        Category food = new Category("식품");
 
         // 상품 목록 추가 ======================================================
         Product product1 = new Product("Galaxy S25", 1200000
@@ -19,21 +16,19 @@ public class Main {
         Product product4 = new Product("AirPods Pro", 350000
                 , "노이즈 캔슬링 무선 이어폰", 1);
 
-        products1.add(product1);
-        products1.add(product2);
-        products1.add(product3);
-        products1.add(product4);
+        electronics.addProducts(product1);
+        electronics.addProducts(product2);
+        electronics.addProducts(product3);
+        electronics.addProducts(product4);
 
-        Product product5 = new Product("onepiece", 100000, "해적이 입고 싶은 원피스", 1);
-        products2.add(product5);
+        Product product5 = new Product("onepiece", 100000
+                , "해적이 입고 싶은 원피스", 1);
+        clothes.addProducts(product5);
 
-        Product product6 = new Product("bibigo mandoo", 10000, "비비고 김치 교자", 5);
-        products3.add(product6);
-
-        // 카테고리 생성=========================================================
-        Category electronics = new Category(products1, "전자제품");
-        Category clothes = new Category(products2, "의류");
-        Category food = new Category(products3, "식품");
+        Product product6 = new Product("bibigo mandoo", 10000
+                , "비비고 김치 교자", 5);
+        food.addProducts(product6);
+        //======================================================================
 
         // CommerceSystem 객체 생성 및 함수 호출
         CommerceSystem commerceSystem = new CommerceSystem();
