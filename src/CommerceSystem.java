@@ -6,9 +6,8 @@ public class CommerceSystem {
     // 커머스 플랫폼의 상품을 관리하고 사용자 입력을 처리하는 클래스
     Scanner sc = new Scanner(System.in);
 
-    // 속성
     // 카테고리 리스트 관리
-    List<Category> categories = new ArrayList<>();
+    private List<Category> categories = new ArrayList<>();
 
     // 메인 시스템 시작 메서드
     public void start() {
@@ -19,7 +18,7 @@ public class CommerceSystem {
             index++;
             // 리스트 인덱스 범위 넘어가면 사용자 입력
             if (index == categories.size()) {
-                // 인덱스 범위 오류 방지 초기화
+                // 인덱스 범위 오류 방지 초기화(카테고리 조회에서 뒤로가기 누를 시 다시 반복위해)
                 index = 0;
                 System.out.printf("%-10s| 프로그램 종료\n","0. 종료");
                 int selectNum = sc.nextInt();
@@ -43,19 +42,19 @@ public class CommerceSystem {
         // 상품 리스트 하나씩 꺼내와서 출력
         while (true) {
             // string format 왼쪽 정렬, 오른쪽 정렬, "," 넣기, 여백 맞추기
-            System.out.printf("%-18s",index + 1 + ". " + products.get(index).productName);
-            System.out.printf("|%,10d원 |", products.get(index).price);
-            System.out.println(" " + products.get(index).description);
+            System.out.printf("%-18s",index + 1 + ". " + products.get(index).getProductName());
+            System.out.printf("|%,10d원 |", products.get(index).getPrice());
+            System.out.println(" " + products.get(index).getDescription());
             index++;
             // 리스트 인덱스 범위 넘어가면 사용자 입력
             if (index == products.size()) {
                 System.out.println("0. 뒤로가기");
                 int check = sc.nextInt();
                 if (check != 0) {
-                    System.out.print("선택한 상품: " + products.get(check - 1).productName);
-                    System.out.printf(" |%,10d원 |", products.get(check - 1).price);
-                    System.out.print(" " + products.get(check - 1).description);
-                    System.out.println(" | 재고: " + products.get(check - 1).count + "개\n");
+                    System.out.print("선택한 상품: " + products.get(check - 1).getProductName());
+                    System.out.printf(" |%,10d원 |", products.get(check - 1).getPrice());
+                    System.out.print(" " + products.get(check - 1).getDescription());
+                    System.out.println(" | 재고: " + products.get(check - 1).getCount() + "개\n");
                 }
                 System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
                 break;
