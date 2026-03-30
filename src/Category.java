@@ -9,7 +9,7 @@ public class Category {
     private final String categoryName;
 
     // 생성자
-    Category(String categoryName) {
+    public Category(String categoryName) {
         this.categoryName = categoryName;
     }
 
