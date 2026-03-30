@@ -8,7 +8,7 @@ public class Product {
     private int count;
 
     //생성자
-    Product(String productName, int price, String description, int count) {
+    public Product(String productName, int price, String description, int count) {
         this.productName = productName;
         this.price = price;
         this.description = description;
@@ -35,7 +35,7 @@ public class Product {
     // 재고 관리 세터
     public void setCount(int num) {
         if (count + num < 0) {
-            System.out.println("재고가 0이하가 됩니다.");
+            System.out.println("재고가 0미만이 됩니다.");
             return;
         }
         count = count + num;
