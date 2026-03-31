@@ -32,7 +32,7 @@ public class Product {
         return count;
     }
 
-    // 재고 관리 세터
+    // 재고 추가 메서드
     public void setCount(int num) {
         if (count + num < 0) {
             System.out.println("재고가 0미만이 됩니다.");
@@ -52,6 +52,10 @@ public class Product {
 
     // 설명 세터
     public void setDescription(String description) {
+        if (description.isEmpty()) {
+            System.out.println("설명을 적어주세요.");
+            return;
+        }
         this.description = description;
     }
 }
