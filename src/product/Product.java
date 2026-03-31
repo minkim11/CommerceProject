@@ -1,3 +1,5 @@
+package product;
+
 public class Product {
     // 개별 상품을 관리하는 클래스입니다.
 
