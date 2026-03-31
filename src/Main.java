@@ -1,3 +1,7 @@
+import product.Category;
+import product.Product;
+import system.CommerceSystem;
+
 public class Main {
     public static void main(String[] args) {
 
@@ -30,7 +34,7 @@ public class Main {
         food.addProducts(product6);
         //======================================================================
 
-        // CommerceSystem 객체 생성 및 함수 호출
+        // system.CommerceSystem 객체 생성 및 함수 호출
         CommerceSystem commerceSystem = new CommerceSystem();
         commerceSystem.setCategories(electronics);
         commerceSystem.setCategories(clothes);

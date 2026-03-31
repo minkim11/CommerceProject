@@ -1,3 +1,10 @@
+package system;
+
+import product.Cart;
+import product.Category;
+import product.InventoryManagement;
+import product.Product;
+
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
@@ -53,7 +60,7 @@ public class CommerceSystem {
                     System.out.println("올바르지 않은 번호 입력!");
                     System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
                 }else { // 카테고리 조회, 장바구니 담기 메서드 호출 후 메인으로 돌아감
-                    Product selectProduct = checkCategory(categories.get(check1 - 1).getProducts(), check1);
+                    Product selectProduct = checkCategory(categories.get(check1 - 1).getProducts(), check1 - 1);
                     addCarts(selectProduct);
                     System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
                 }
@@ -213,7 +220,7 @@ public class CommerceSystem {
         // 카테고리 선택
         int check6 = sc.nextInt();
         sc.nextLine();
-        Category selectCat = categories.get(check6);
+        Category selectCat = categories.get(check6 - 1);
         // 상품 정보 입력
         System.out.printf("[ %s 카테고리에 상품 추가 ]\n", selectCat.getCategoryName());
         System.out.print("상품명을 입력해주세요: ");
@@ -238,7 +245,7 @@ public class CommerceSystem {
                 }
             }
             Product newProduct = new Product(productName, price, description, count);
-            categories.get(check6).addProducts(newProduct);
+            categories.get(check6 - 1).addProducts(newProduct);
             System.out.println("상품이 성공적으로 추가되었습니다!");
         } else {
             System.out.println("취소되었습니다!");
@@ -250,7 +257,8 @@ public class CommerceSystem {
         System.out.print("수정할 상품명을 입력해주세요: ");
         String productName = sc.nextLine();
         boolean isPresent = false;
-        for (Product product : Category.getAllProducts()) {
+        for (int i = 0; i < Category.getAllProducts().size(); i++) {
+            Product product = Category.getAllCatOfProduct(i);
             if (product.getProductName().equals(productName)) {
                 isPresent = true;
                 System.out.printf("현재 상품 정보: %s | %,d원 | %s | 재고: %d개\n\n"
@@ -271,7 +279,11 @@ public class CommerceSystem {
                         System.out.println("현재 설명: " + product.getDescription());
                         System.out.print("새로운 설명을 입력해주세요: ");
                         String newDescription = sc.nextLine();
-                        System.out.println("수정 완료!");
+                        if (newDescription.isEmpty()) {
+                            System.out.println("수정 실패!");
+                        } else {
+                            System.out.println("수정 완료!");
+                        }
                         product.setDescription(newDescription);
                         break;
                     case 3:
@@ -301,7 +313,7 @@ public class CommerceSystem {
         // 카테고리 선택
         int index = 0;
         int check1 = sc.nextInt();
-        Category selectCat = categories.get(check1);
+        Category selectCat = categories.get(check1 - 1);
         System.out.println("[ " + selectCat.getCategoryName() + " 카테고리 ]");
         // 카테고리의 상품 리스트에서 상품 하나씩 꺼내와서 출력
         for (Product product : selectCat.getProducts()) {
@@ -312,7 +324,13 @@ public class CommerceSystem {
                     , product.getDescription());
         }
         int check2 = sc.nextInt();
-        Product selectProduct = selectCat.getProducts().get(check2 - 1);
+        Product selectProduct;
+        try {
+            selectProduct = selectCat.getProduct(check2 - 1);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
         System.out.printf("선택한 상품: %s | %,d원 | %s | 재고: %s개\n\n"
                 , selectProduct.getProductName()
                 , selectProduct.getPrice()

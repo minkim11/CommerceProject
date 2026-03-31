@@ -1,3 +1,5 @@
+package product;
+
 public class Cart {
     // 사용자가 상품을 담을 장바구니 클래스
 
