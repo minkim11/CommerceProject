@@ -26,9 +26,9 @@ public class InventoryManagement {
     }
 
     // 구매 시 재고 차감 (장바구니 상품과 동일한 상품 찾아서 수량만큼 재고 감소)
-    public void reduceCount(Category category) {
+    public void reduceCount() {
         for (Cart cart : carts) {
-            for (Product product : category.getProducts()) {
+            for (Product product : Category.getAllProducts()) {
                 if (product.getProductName().equals(cart.getProductName())){
                     System.out.printf("%s 재고가 %d개",product.getProductName(), product.getCount());
                     product.setCount(-cart.getQuantity());

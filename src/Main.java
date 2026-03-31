@@ -5,7 +5,6 @@ public class Main {
         Category electronics = new Category("전자제품");
         Category clothes = new Category("의류");
         Category food = new Category("식품");
-        Category all = new Category("전체상품");
 
         // 상품 목록 추가 ======================================================
         Product product1 = new Product("Galaxy S25", 1200000
@@ -29,22 +28,13 @@ public class Main {
         Product product6 = new Product("bibigo mandoo", 10000
                 , "비비고 김치 교자", 5);
         food.addProducts(product6);
-
-        all.addProducts(product1);
-        all.addProducts(product2);
-        all.addProducts(product3);
-        all.addProducts(product4);
-        all.addProducts(product5);
-        all.addProducts(product6);
         //======================================================================
 
         // CommerceSystem 객체 생성 및 함수 호출
         CommerceSystem commerceSystem = new CommerceSystem();
-        commerceSystem.setCategories(all);
         commerceSystem.setCategories(electronics);
         commerceSystem.setCategories(clothes);
         commerceSystem.setCategories(food);
         commerceSystem.start();
-
     }
 }
