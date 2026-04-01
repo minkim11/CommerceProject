@@ -9,6 +9,7 @@ public enum Grade {
     BRONZE(1, 0),
     SILVER(2, 0.05),
     GOLD(3, 0.1),
+//    TEST(5, 0.2),
     PLATINUM(4, 0.15);
 
     private static final Map<Integer, Grade> BY_ORDER =
@@ -28,11 +29,7 @@ public enum Grade {
     }
 
     public static Grade fromOrderNum(int orderNum) {
-        Grade grade = BY_ORDER.get(orderNum);
-        if (grade == null) {
-            throw new IllegalArgumentException("해당 번호와 일치하는 등급이 없습니다.");
-        }
-        return grade;
+        return BY_ORDER.get(orderNum);
     }
 
     public int getOrderNum() {

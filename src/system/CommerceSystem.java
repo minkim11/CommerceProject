@@ -6,10 +6,8 @@ import product.Category;
 import product.InventoryManagement;
 import product.Product;
 
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CommerceSystem {
     // 커머스 플랫폼의 상품을 관리하고 사용자 입력을 처리하는 클래스
@@ -41,30 +39,39 @@ public class CommerceSystem {
                 // 인덱스 범위 오류 방지 초기화(메인 시스템 메뉴 재반복을 위한 초기화)
                 index = 0;
                 int check1 = sc.nextInt();
-                if (check1 == 0) { // 0 입력시 종료
+                if (check1 == 0) {                                                // 0. 종료
                     System.out.println("커머스 플랫폼을 종료합니다.");
                     break;
-                } else if (check1 == 6) { // 6입력시 관리자 모드 진입
+                } else if (check1 == 6) {                                         // 6. 관리자 모드 진입
                     adminMode();
-                } else if (check1 == categories.size() + 1 && !carts.isEmpty()) { // 장바구니에 상품 있을 경우 확인 메뉴
+                } else if (check1 == categories.size() + 1 && !carts.isEmpty()) { // 4.장바구니 있을 경우 장바구니 확인 메뉴
                     System.out.println("아래와 같이 주문 하시겠습니까?");
                     int totalPrice = checkCart(); // 장바구니 출력 및 계산
                     System.out.println("1. 주문 확정      2. 메인으로 돌아가기");
-                    int check4 = sc.nextInt();
-                    if (check4 == 1) {
-                        // 고객 등급 입력 후 할인율 반환해서 order로 넘겨주기
+                    int check2 = sc.nextInt();
+                    if (check2 == 1) {
+                        // 고객 등급 반환해서 order로 넘겨주기
                         Grade grade = checkGrade();
-                        order(totalPrice, grade); // 주문 완료 후 메인으로 돌아감
+                        if (grade != null) {
+                            order(totalPrice, grade); // 주문 완료 후 메인으로 돌아감
+                        } else {
+                            System.out.println("잘못된 등급 입력!");
+                        }
                         System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
                     } else {
                         System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
                     }
+                } else if (check1 == categories.size() + 2 && !carts.isEmpty()) { // 5. 장바구니 삭제
+                    removeCart();
+                    System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
                 } else if (check1 > categories.size() || check1 < 0) { // 메뉴 이외의 번호 누를 경우 예외 처리
                     System.out.println("올바르지 않은 번호 입력!");
                     System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
-                }else { // 카테고리 조회, 장바구니 담기 메서드 호출 후 메인으로 돌아감
-                    Product selectProduct = checkCategory(categories.get(check1 - 1).getProducts(), check1 - 1);
-                    addCarts(selectProduct);
+                }else { // 카테고리 조회, 장바구니 담기 메서드 호출 후 메인으로 돌아감    // 1.전자제품 2.의류 3.식품
+                    List<Product> choiceProducts =
+                            checkCategory(categories.get(check1 - 1).getProducts(), check1 - 1);
+                    Product choiceProduct = selectProduct(choiceProducts);
+                    addCarts(choiceProduct);
                     System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
                 }
             }
@@ -74,26 +81,88 @@ public class CommerceSystem {
 
 
     // 카테고리 상품 리스트 조회 메서드
-    public Product checkCategory(List<Product> products, int selectNum) {
-        System.out.println("[ " + categories.get(selectNum).getCategoryName() + " 카테고리 ]");
-        // 카테고리의 상품 리스트에서 상품 하나씩 꺼내와서 출력
-        // string format 왼쪽 정렬, 오른쪽 정렬, 숫자에 "," 넣기, 여백 맞추기
-        products.stream()
-                .forEachOrdered(product -> System.out.printf("%d. %-18s|%,10d원 | %s\n"
-                        ,products.indexOf(product) + 1, product.getProductName()
-                        , product.getPrice(), product.getDescription()));
-        System.out.println("0. 뒤로가기");
+    public List<Product> checkCategory(List<Product> products, int selectNum) {
+        // 필터할 금액
+        int filterPrice = 1000000;
+        // 필터한 상품들 담을 리스트 생성
+        List<Product> selectProducts = new ArrayList<>();
+        // 필터 상품 인덱스
+        AtomicInteger index = new AtomicInteger(1);
 
-        int check2 = sc.nextInt();
-        if (check2 == 0) { // 뒤로가기 - 메인으로 돌아감
+        // 메뉴 1. 전체상품 2. 필터 금액 이하 3. 필터 금액 초과 0. 뒤로가기
+        System.out.println("[ " + categories.get(selectNum).getCategoryName() + " 카테고리 ]");
+        System.out.printf("1. 전체 상품 보기\n2. 가격대별 필터링 (%d만원 이하)\n3. 가격대별 필터링 (%d만원 초과)\n"
+                , filterPrice / 10000, filterPrice / 10000);
+        System.out.println("0. 뒤로가기");
+        int check = sc.nextInt();
+        // 카테고리의 상품 출력, 가격 필터링
+        // string format 왼쪽 정렬, 오른쪽 정렬, 숫자에 "," 넣기, 여백 맞추기
+        switch (check) {
+            case 1:
+                selectProducts = products.stream()
+                        .toList();
+                System.out.println("[ 전체 상품 목록 ]");
+                selectProducts.stream()
+                        .forEachOrdered(product ->
+                                System.out.printf("%d. %-18s|%,10d원 | %s\n"
+                                        , products.indexOf(product) + 1
+                                        , product.getProductName(), product.getPrice(), product.getDescription())
+                        );
+                break;
+            case 2:
+                selectProducts = products.stream()
+                        .filter(product -> (product.getPrice() <= filterPrice))
+                        .toList();
+                System.out.printf("[ %d만원 이하 상품 목록 ]\n", filterPrice/10000);
+                if (selectProducts.isEmpty()) {
+                    System.out.println("없음");
+                } else {
+                    selectProducts.stream()
+                            .forEachOrdered(product ->
+                                    System.out.printf("%d. %-18s|%,10d원 | %s\n"
+                                            , index.getAndIncrement()
+                                            , product.getProductName(), product.getPrice(), product.getDescription())
+                            );
+                }
+                break;
+            case 3:
+                selectProducts = products.stream()
+                        .filter(product -> (product.getPrice() > filterPrice))
+                        .toList();
+                System.out.printf("[ %d만원 초과 상품 목록 ]\n", filterPrice/10000);
+                if (selectProducts.isEmpty()) {
+                    System.out.println("없음");
+                } else {
+                    selectProducts.stream()
+                            .forEachOrdered(product ->
+                                    System.out.printf("%d. %-18s|%,10d원 | %s\n"
+                                            , index.getAndIncrement()
+                                            , product.getProductName(), product.getPrice(), product.getDescription())
+                            );
+                }
+                break;
+            case 0:
+                return null;
+        }
+        System.out.println("0. 뒤로가기");
+        return selectProducts;
+    }
+
+    // 카테고리의 상품 선택 메서드
+    public Product selectProduct(List<Product> products) {
+        if (products == null) {
             return null;
-        } else if (0 < check2 && check2 <= products.size()) { // 입력한 번호의 상품 출력, 인덱스 범위 에러 예외 처리
+        }
+        int check = sc.nextInt();
+        if (check == 0) { // 뒤로가기 - 메인으로 돌아감
+            return null;
+        } else if (0 < check && check <= products.size()) { // 입력한 번호의 상품 출력, 인덱스 범위 에러 예외 처리
             System.out.printf("선택한 상품: %s | %,d원 | %s | 재고: %s개\n\n"
-                    , products.get(check2 - 1).getProductName()
-                    , products.get(check2 - 1).getPrice()
-                    , products.get(check2 - 1).getDescription()
-                    , products.get(check2 - 1).getCount());
-            return products.get(check2 - 1);
+                    , products.get(check - 1).getProductName()
+                    , products.get(check - 1).getPrice()
+                    , products.get(check - 1).getDescription()
+                    , products.get(check - 1).getCount());
+            return products.get(check - 1);
         }
         System.out.println("유효하지 않은 상품번호 입력!");
         return null;
@@ -116,12 +185,12 @@ public class CommerceSystem {
         System.out.println("위 상품을 장바구니에 추가하시겠습니까?");
         System.out.println("1. 확인        2.취소");
         try {
-            int check3 = sc.nextInt();
-            if (check3 != 1) {
+            int check = sc.nextInt();
+            if (check != 1) {
                 System.out.println("취소되었습니다.");
                 return;
             }
-            im.checkCount(product); // 장바구니 담기 전 재고 확인 메서드 호출
+            im.checkCount(product); // 장바구니 생성 및 담기 전 재고 확인 메서드 호출
         } catch (InputMismatchException ie) {
             System.out.println("숫자를 입력해주세요.");
             return;
@@ -130,49 +199,67 @@ public class CommerceSystem {
             return;
         }
         // 장바구니에 동일한 상품 있을 경우 수량 1개 추가 후 메서드 종료
-        for (Cart cart : carts) {
-            if (cart.getProductName().equals(product.getProductName())) {
-                cart.setQuantity(1);
-                System.out.println(cart.getProductName() + "가 장바구니에 추가되었습니다!!\n");
-                return;
-            }
+        Optional<Cart> alreadyCart = carts.stream()
+                .filter(cart -> cart.getProductName().equals(product.getProductName()))
+                .findFirst();
+        if (alreadyCart.isPresent()) {
+            alreadyCart.get().setQuantity(1);
+            System.out.println(alreadyCart.get().getProductName() + "가 장바구니에 추가되었습니다!\n");
+            return;
         }
         // 장바구니 생성 후 담기
         Cart cart = new Cart(product);
         carts.add(cart);
-        System.out.println(cart.getProductName() + "가 장바구니에 추가되었습니다!\n");
+        System.out.println(cart.getProductName() + "가 장바구니에 추가되었습니다!!\n");
     }
 
     // 장바구니 출력 및 금액 계산
     public int checkCart() {
-        int totalPrice = 0;
         System.out.println("[ 장바구니 내역 ]");
         for (Cart cart : carts) {
             System.out.printf("%-18s | %,10d원 | 수량: %d개\n"
                     ,cart.getProductName()
                     ,cart.getPrice()
                     ,cart.getQuantity());
-            totalPrice += cart.getPrice() * cart.getQuantity();
         }
+        int totalPrice = carts.stream().mapToInt(cart -> cart.getPrice() * cart.getQuantity()).sum();
         System.out.println("[ 총 주문 금액 ]");
         System.out.printf("%,d원\n", totalPrice);
         return totalPrice;
     }
 
+    // 장바구니 삭제 메서드 (stream.filter 사용) - 상품 이름 입력받은 후 장바구니에 있는 상품일 시 삭제
+    public void removeCart() {
+        System.out.println("장바구니에서 제거할 상품 이름을 입력하세요: ");
+        sc.nextLine();
+        String productName = sc.nextLine();
+        Optional<Cart> choiceCart = carts.stream()
+                .filter(cart -> cart.getProductName().equals(productName))
+                .findFirst();
+        if (choiceCart.isPresent()) {
+            carts.remove(choiceCart.get());
+            System.out.println(productName + " 상품을 장바구니에서 뺍니다!");
+        } else {
+            System.out.println(productName + "장바구니에 없는 상품입니다!");
+        }
+    }
+
     // 고객 등급 입력 후 등급 반환 메서드
     public Grade checkGrade() {
         System.out.println("고객 등급을 입력해주세요.");
-        int index = 1;
-        for (Grade grade : Grade.values()) {
-            System.out.printf("%d. %-9s:%4s%% 할인\n",index, grade, (int)(grade.getDiscountRate()*100));
-            index++;
-        }
+        Arrays.stream(Grade.values())
+                .sorted(Comparator.comparing(Grade::getOrderNum))
+                .forEach(grade -> System.out.printf("%d. %-9s:%4s%% 할인\n"
+                        ,grade.getOrderNum(), grade, (int)(grade.getDiscountRate()*100)));
         int check = sc.nextInt();
         return Grade.fromOrderNum(check);
     }
 
     // 주문 기능
     public void order(int totalPrice, Grade grade) {
+        if (grade == null) {
+            return;
+        }
         double discountRate = grade.getDiscountRate();
         int discountPrice = (int)(totalPrice * discountRate);
         int finalPrice = (totalPrice - discountPrice);
@@ -195,9 +282,9 @@ public class CommerceSystem {
                 while (true) {
                     System.out.println("[ 관리자 모드 ]");
                     System.out.println("1. 상품 추가\n2. 상품 수정\n3. 상품 삭제\n4. 전체 상품 현황\n0. 메인으로 돌아가기");
-                    int check5 = sc.nextInt();
+                    int check = sc.nextInt();
                     sc.nextLine();
-                    switch (check5) {
+                    switch (check) {
                         case 0:
                             System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
                             break adminPass;
@@ -234,9 +321,9 @@ public class CommerceSystem {
             System.out.println(i + 1 + ". " + categories.get(i).getCategoryName());
         }
         // 카테고리 선택
-        int check6 = sc.nextInt();
+        int check1 = sc.nextInt();
         sc.nextLine();
-        Category selectCat = categories.get(check6 - 1);
+        Category selectCat = categories.get(check1 - 1);
         // 상품 정보 입력
         System.out.printf("[ %s 카테고리에 상품 추가 ]\n", selectCat.getCategoryName());
         System.out.print("상품명을 입력해주세요: ");
@@ -252,16 +339,18 @@ public class CommerceSystem {
         System.out.printf("\n%s | %,d원 | %s | 재고: %d개\n", productName, price, description, count);
         System.out.println("위 정보로 상품을 추가하시겠습니까?");
         System.out.println("1. 확인    2. 취소");
-        int check7 = sc.nextInt();
-        if (check7 == 1) {
+        int check2 = sc.nextInt();
+        if (check2 == 1) {
             for (Product product : selectCat.getProducts()) {
                 if (product.getProductName().equals(productName)) {
                     System.out.println("이미 존재하는 상품입니다!");
                     return;
                 }
             }
+            // 새로운 Product 객체 생성
             Product newProduct = new Product(productName, price, description, count);
-            categories.get(check6 - 1).addProducts(newProduct);
+            // 선택한 카테고리에 추가
+            categories.get(check1 - 1).addProducts(newProduct);
             System.out.println("상품이 성공적으로 추가되었습니다!");
         } else {
             System.out.println("취소되었습니다!");
@@ -280,9 +369,9 @@ public class CommerceSystem {
                 System.out.printf("현재 상품 정보: %s | %,d원 | %s | 재고: %d개\n\n"
                         , product.getProductName(), product.getPrice(), product.getDescription(), product.getCount());
                 System.out.println("수정할 항목을 선택해주세요:\n1. 가격\n2. 설명\n3. 재고수량");
-                int check8 = sc.nextInt();
+                int check = sc.nextInt();
                 sc.nextLine();
-                switch (check8) {
+                switch (check) {
                     case 1:
                         System.out.println("현재 가격: " + product.getPrice());
                         System.out.print("새로운 가격을 입력해주세요:");
@@ -361,11 +450,7 @@ public class CommerceSystem {
             int check4 = sc.nextInt();
             if (check4 == 1) {
                 selectCat.delProduct(selectProduct);
-                for (Cart cart : carts) {
-                    if (cart.getProductName().equals(selectProduct.getProductName())) {
-                        carts.remove(cart);
-                    }
-                }
+                carts.removeIf(cart -> cart.getProductName().equals(selectProduct.getProductName()));
                 System.out.println("삭제 완료!");
                 return;
             }
