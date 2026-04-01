@@ -1,5 +1,6 @@
 package system;
 
+import customer.Grade;
 import product.Cart;
 import product.Category;
 import product.InventoryManagement;
@@ -28,7 +29,7 @@ public class CommerceSystem {
         while (true) {
             System.out.println(index + 1 + ". " + categories.get(index).getCategoryName());
             index++;
-            // 리스트 인덱스 범위 넘어가면 사용자 입력 1. 전자제품 2. 의류 3. 식품 0. 종료 ...
+            // 카테고리 리스트 인덱스 범위 넘어가면 사용자 입력 1. 전자제품 2. 의류 3. 식품 0. 종료 ...
             if (index == categories.size()) {
                 System.out.printf("%-10s| 프로그램 종료\n","0. 종료");
                 System.out.println("6. 관리자 모드");
@@ -51,7 +52,9 @@ public class CommerceSystem {
                     System.out.println("1. 주문 확정      2. 메인으로 돌아가기");
                     int check4 = sc.nextInt();
                     if (check4 == 1) {
-                        order(totalPrice); // 주문 완료 후 메인으로 돌아감
+                        // 고객 등급 입력 후 할인율 반환해서 order로 넘겨주기
+                        Grade grade = checkGrade();
+                        order(totalPrice, grade); // 주문 완료 후 메인으로 돌아감
                         System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
                     } else {
                         System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
@@ -72,19 +75,15 @@ public class CommerceSystem {
 
     // 카테고리 상품 리스트 조회 메서드
     public Product checkCategory(List<Product> products, int selectNum) {
-        // 상품 인덱스
-        int index = 0;
         System.out.println("[ " + categories.get(selectNum).getCategoryName() + " 카테고리 ]");
         // 카테고리의 상품 리스트에서 상품 하나씩 꺼내와서 출력
-        for (Product product : products) {
-            // string format 왼쪽 정렬, 오른쪽 정렬, 숫자에 "," 넣기, 여백 맞추기
-            System.out.printf("%d. %-18s|%,10d원 | %s\n"
-                    , ++index
-                    , product.getProductName()
-                    , product.getPrice()
-                    , product.getDescription());
-        }
+        // string format 왼쪽 정렬, 오른쪽 정렬, 숫자에 "," 넣기, 여백 맞추기
+        products.stream()
+                .forEachOrdered(product -> System.out.printf("%d. %-18s|%,10d원 | %s\n"
+                        ,products.indexOf(product) + 1, product.getProductName()
+                        , product.getPrice(), product.getDescription()));
         System.out.println("0. 뒤로가기");
+
         int check2 = sc.nextInt();
         if (check2 == 0) { // 뒤로가기 - 메인으로 돌아감
             return null;
@@ -160,9 +159,26 @@ public class CommerceSystem {
         return totalPrice;
     }
 
+    // 고객 등급 입력 후 등급 반환 메서드
+    public Grade checkGrade() {
+        System.out.println("고객 등급을 입력해주세요.");
+        int index = 1;
+        for (Grade grade : Grade.values()) {
+            System.out.printf("%d. %-9s:%4s%% 할인\n",index, grade, (int)(grade.getDiscountRate()*100));
+            index++;
+        }
+        int check = sc.nextInt();
+        return Grade.fromOrderNum(check);
+    }
+
     // 주문 기능
-    public void order(int totalPrice) {
-        System.out.printf("주문이 완료되었습니다! 총 금액: %,d원\n", totalPrice);
+    public void order(int totalPrice, Grade grade) {
+        double discountRate = grade.getDiscountRate();
+        int discountPrice = (int)(totalPrice * discountRate);
+        int finalPrice = (totalPrice - discountPrice);
+        System.out.printf("주문이 완료되었습니다!\n할인 전 금액: %,d원\n", totalPrice);
+        System.out.printf("%s 등급 할인(%d%%): -%,d원\n", grade, (int)(discountRate*100), discountPrice);
+        System.out.printf("최종 결제 금액: %,d원\n", finalPrice);
         im.reduceCount(); // 재고 차감 메서드 호출
         carts.clear(); // 장바구니 비우기
     }
