@@ -68,6 +68,9 @@ public class Category {
 
     // 상품 추가 메서드
     public void addProducts(Product product) {
+        if (product == null) {
+            return;
+        }
         products.add(product);
         allProducts.add(product);
     }
