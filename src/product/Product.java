@@ -54,7 +54,7 @@ public class Product {
 
     // 설명 세터
     public void setDescription(String description) {
-        if (description.isEmpty()) {
+        if (description.isBlank()) {
             System.out.println("설명을 적어주세요.");
             return;
         }
