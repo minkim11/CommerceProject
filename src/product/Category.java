@@ -51,19 +51,13 @@ public class Category {
     }
 
     // 상품 리스트의 상품 접근
-    public Product getProduct(int index) throws IndexOutOfBoundsException {
-        if (0 <= index && index < products.size()) {
-            return products.get(index);
-        }
-        throw new IndexOutOfBoundsException("인덱스 범위 초과");
+    public Product getProduct(int index) {
+        return products.get(index);
     }
 
     // 전체 상품리스트의 상품 접근
-    public static Product getAllCatOfProduct(int index) throws IndexOutOfBoundsException {
-        if (0 <= index && index < allProducts.size()) {
-            return allProducts.get(index);
-        }
-        throw new IndexOutOfBoundsException("인덱스 범위 초과");
+    public static Product getAllCatOfProduct(int index) {
+        return allProducts.get(index);
     }
 
     // 상품 추가 메서드
@@ -77,6 +71,10 @@ public class Category {
 
     // 상품 삭제 메서드
     public  void delProduct(Product product) {
+        if (products.isEmpty() || allProducts.isEmpty()) {
+            System.out.println("비어있음");
+            return;
+        }
         products.remove(product);
         allProducts.remove(product);
     }

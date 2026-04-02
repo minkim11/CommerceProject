@@ -108,12 +108,16 @@ public class CommerceSystem {
                 selectProducts = products.stream()
                         .toList();
                 System.out.println("[ 전체 상품 목록 ]");
-                selectProducts.stream()
-                        .forEachOrdered(product ->
-                                System.out.printf("%d. %-18s|%,10d원 | %s\n"
-                                        , products.indexOf(product) + 1
-                                        , product.getProductName(), product.getPrice(), product.getDescription())
-                        );
+                if (selectProducts.isEmpty()) {
+                    System.out.println("없음");
+                } else {
+                    selectProducts.stream()
+                            .forEachOrdered(product ->
+                                    System.out.printf("%d. %-18s|%,10d원 | %s\n"
+                                            , products.indexOf(product) + 1
+                                            , product.getProductName(), product.getPrice(), product.getDescription())
+                            );
+                }
                 break;
             case 2:
                 selectProducts = products.stream()
@@ -457,14 +461,13 @@ public class CommerceSystem {
                     , product.getPrice()
                     , product.getDescription());
         }
-        int check2 = sc.nextInt();
-        Product selectProduct;
-        try {
-            selectProduct = selectCat.getProduct(check2 - 1);
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println(e.getMessage());
+        if (selectCat.getProducts().isEmpty()) {
+            System.out.println("없음");
             return;
         }
+        int check2 = sc.nextInt();
+        Product selectProduct;
+        selectProduct = selectCat.getProduct(check2 - 1);
         System.out.printf("선택한 상품: %s | %,d원 | %s | 재고: %s개\n\n"
                 , selectProduct.getProductName()
                 , selectProduct.getPrice()
@@ -497,6 +500,9 @@ public class CommerceSystem {
                     , product.getProductName()
                     , product.getPrice()
                     , product.getDescription());
+        }
+        if (Category.getAllProducts().isEmpty()) {
+            System.out.println("없음");
         }
     }
 }
